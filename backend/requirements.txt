@@ -1,0 +1,11 @@
+Flask==2.0.2
+Flask-Session==0.4.0
+SQLAlchemy==1.4.22
+psycopg2-binary==2.9.1
+Twilio==6.57.0
+sendgrid==6.9.7
+cryptography==3.4.8
+requests==2.26.0
+paramiko==2.7.2
+Flask-Limiter==2.1.0
+python-dotenv==0.19.0
