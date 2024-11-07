@@ -14,11 +14,12 @@ class User(db.Model):
 
 class OTP(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
+	phone_number = db.Column(db.String(15), nullable=False)
 	otp_code = db.Column(db.String(6), nullable=False)
-	expires_at = db.Column(db.DateTime, nullable=False)
-	is_valid = db.Column(db.Boolean, default=True)
-	user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-	user = db.relationship('User', backref=db.backref('otps', lazy=True))
+	expirstion = db.Column(db.DateTime, nullable=False, default=datetime.utcnow()+
+		timedelta(minutes=10))
+
+	is_verified = db.Column(db.Boolean, default=False)
 
 	def __repr__(self):
 		return f"<OTP {self.otp_code}>"
@@ -29,10 +30,10 @@ class OTP(db.Model):
 		return datetime.utcnow() > self.expires_at #returns whether otp has expired
 
 class Device(db.Model):
-	id = db.Column(DB.Integer, primary_key=True)
+	id = db.Column(db.Integer, primary_key=True)
 	mac_address = db.Column(db.String(17), unique=True, nullable=False)
 	ip_address = db.Column(db.String(15), nullable=False)
-	access_granted_at = db.Column(db.DateTime, default=utc.now)
+	access_granted_at = db.Column(db.DateTime, default=datetime.utcnow())
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 	user = db.relationship('User', backref=db.backref('devices', lazy = True))
 

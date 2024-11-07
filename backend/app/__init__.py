@@ -22,7 +22,7 @@ def create_app():
 
 	#register blueprints
 
-
-	#app.register_blueprint(main)
+	from .routes import bp
+	app.register_blueprint(bp)
 
 	return app
