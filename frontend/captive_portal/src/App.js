@@ -1,7 +1,20 @@
 import logo from './logo.svg';
 import './App.css';
+import { io } from 'socket.io-client';
 
 function App() {
+
+
+  //Establish socketio connection to the server
+  var socket = io('http://localhost:5000', {
+    transports: ['polling']
+});
+
+
+  socket.on('otp_notification', (data) => {
+    console.log("Data:", data);
+  
+  })
   return (
     <div className="App">
       <header className="App-header">
