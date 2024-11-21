@@ -16,6 +16,7 @@ class OTP(db.Model):
 		
 		return datetime.utcnow() > self.expires_at #returns whether otp has expired
 
+#Model for storing devices
 class Device(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	mac_address = db.Column(db.String(17), unique=True, nullable=False)
@@ -24,3 +25,10 @@ class Device(db.Model):
 	
 	def __repr__(self):
 		return f"<Device {self.mac_address}>"
+	
+#Model for storing messages(OTP Notifications)
+class Message(db.Model):
+	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+	otp = db.Column(db.String(10), nullable=False)
+	phone_number = db.Column(db.String(15), nullable=[False])
+	

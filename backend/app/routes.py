@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.utils.otp_handler import generate_otp, verify_otp, send_otp
-from .models import OTP
+from .models import OTP, Message
 from app import db
 from datetime import datetime, timedelta
 from app import create_app
@@ -45,4 +45,49 @@ def verify_otp_endpoint():
         return jsonify({'message': 'OTP verified successfully'}), 200
     else:
         return jsonify({'error': 'Invalid OTP'}), 401
+    
+#Query notifications based on phone number
+@bp.route('/notifications', methods=['GET'])
+def single_notifications_endpoint():
 
+    phone_number = request.args.get('phone_number')
+
+    if not phone_number:
+        return jsonify({'Error': 'Phone number required'})
+    
+    try:
+        messages = Message.query.filter_by(phone_number=phone_number).all()
+
+        notifications = []
+        
+        for message in messages:
+            notifications.append({
+                'id': message.id,
+                'otp': message.otp,
+                'phone_number': message.phone_number
+            })
+        
+        return jsonify({'notifications': notifications})
+    except Exception as e:
+        return jsonify({'error': f"error fetching notifications: {str(e)}"}), 500
+    
+#Query all notifications enspoint
+@bp.route('/notifications/all', methods=['GET'])
+def get_all_notifications():
+    
+    try:
+        messages = Message.query.all()
+
+        notifications = []
+
+        for message in messages:
+            notifications.append({
+                'id': message.id,
+                'otp': message.otp,
+                'phone_number':message.phone_number
+            })
+        
+        return jsonify({'notifications': notifications}, 200)
+    except Exception as e:
+        return jsonify({'error': f'Error fetching all messages {str(e)}'}), 500
+    
