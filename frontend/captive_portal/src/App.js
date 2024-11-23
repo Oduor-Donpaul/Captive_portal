@@ -14,7 +14,7 @@ import SignUp from './components/SignUp';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
-  const [admin, setAdmin] = useState(false);
+  const [admin, setAdmin] = useState(true);
 
 
   //Establish socketio connection to the server

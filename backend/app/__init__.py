@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from app.config import Config
 from dotenv import load_dotenv
+from app.init_utils import bcrypt, login_manager
 
 
 #initialize database
@@ -17,7 +18,10 @@ def create_app():
 	#load confugaration settings
 	app.config.from_object(Config)
 
+
 	#Initialize extensions
+	bcrypt.init_app(app)
+	login_manager.init_app(app)
 	db.init_app(app)
 	migrate.init_app(app, db) #initialize migrate instance with app and db
 

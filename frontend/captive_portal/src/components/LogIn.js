@@ -59,8 +59,10 @@ const LogIn = () => {
                 <br></br>
                 <Button type="submit">Log In</Button>
             </div>
+
+
         </div>
     )
 };
 
-export default Log In;
+export default LogIn;

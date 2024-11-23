@@ -13,6 +13,7 @@ const GuestHome = () => {
     const handleOtpChange = (e) => {
         setOtp(e.target.value)
     }
+
     return (
         <div style={{textAlign: 'center', alignItems: 'center', justifyContent: 'center'}}>
             <div style={{textAlign: 'center'}}>
@@ -24,7 +25,8 @@ const GuestHome = () => {
                     border: '5px solid blue',
                     width: '40%',
                     padding: '40px',
-                    margin: '0 auto'}}>
+                    margin: '0 auto',
+                    marginBottom: '10px'}}>
                     <h2><b>Sign in To Network</b></h2>
                     <label htmlFor="phone_number">
                         Enter <b>M-Pesa</b> Phone Number:
@@ -58,9 +60,13 @@ const GuestHome = () => {
                     <br></br>
                     <Button>Sign In</Button>              
                 </div>
+                <div>
+                    <p style={{color: 'purple', fontSize: '20px'}}><b>Customer Support: 0112735500 </b></p>
+                    <p>&#xA9; 2024 Techpoint</p>
+                </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default GuestHome;
