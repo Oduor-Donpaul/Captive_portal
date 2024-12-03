@@ -11,10 +11,10 @@ app = create_app()
 CORS(app, resources={r"/*": {"origins": ["http://localhost:3000"]}})
 socketio = SocketIO(app, cors_allowed_origins=["http://localhost:3000"], async_mode='eventlet', logger=True, engineio_logger=True)
 
+
 @socketio.on('connect')
 def handle_connect():
     print("Client connected")
-
 
 #channel.queue_declare(queue='notifications_queue')
 

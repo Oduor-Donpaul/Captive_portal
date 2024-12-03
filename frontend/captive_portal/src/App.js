@@ -1,8 +1,21 @@
 import logo from './logo.svg';
+//import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useState } from 'react';
 import './App.css';
 import { io } from 'socket.io-client';
+import OtpSearch from './pages/OtpSearch';
+import AdminNavbar from './components/AdminNavbar';
+import Home from './pages/Home';
+import Notifications from './pages/Notifications';
+import GenerateOtp from './pages/GenerateOtp';
+import AppNavbar from './components/AppNavbar';
+import GuestHome from './pages/GuestHome';
+import SignUp from './components/SignUp';
+import LogIn from './components/LogIn';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
+  const [admin, setAdmin] = useState(false);
 
 
   //Establish socketio connection to the server
@@ -16,22 +29,26 @@ function App() {
   
   })
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      {admin ? <AdminNavbar /> : <AppNavbar />}
+      <div>
+        {admin ?
+          <Routes>
+            <Route path='/admin' element={<Home />} />
+            <Route path='/admin/notifications/all' element={<Notifications />} />
+            <Route path='/admin/search' element={<OtpSearch />} />
+            <Route path='/admin/generateotp' element={<GenerateOtp />} />
+            <Route path='/admin/signup' element={<SignUp />} />
+            <Route path='/admin/login' element={<LogIn />} />
+          </Routes>
+          :
+          <Routes>
+            <Route path='/' element={<GuestHome />} />
+            <Route path='/login' element={<LogIn />} />
+        </Routes>
+        }
+      </div>
+    </Router>
   );
 }
 

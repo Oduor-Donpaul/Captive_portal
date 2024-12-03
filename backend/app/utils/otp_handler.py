@@ -3,7 +3,6 @@ import string
 from datetime import datetime, timedelta
 from app.models import OTP
 from app import db
-from app import create_app
 
 #Generate random six digit OTP
 def generate_otp():

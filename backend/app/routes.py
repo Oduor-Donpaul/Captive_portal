@@ -1,12 +1,111 @@
 from flask import Blueprint, request, jsonify
-from app.utils.otp_handler import generate_otp, verify_otp, send_otp
 from .models import OTP, Message
 from app import db
 from datetime import datetime, timedelta
-from app import create_app
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, create_refresh_token
 from flask import Blueprint
+from .models import User
+from datetime import datetime, timedelta
+
 
 bp = Blueprint("main", __name__)
+auth_blueprint = Blueprint('auth', __name__)
+
+#checks authorization
+def is_authorized(roles):
+    user = get_jwt_identity()
+    return user['role'] in roles
+
+#Role required decorator, sets the role required for the action
+def role_required(role):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            if not create_user.is_authenticated:
+                return jsonify({'message': "Unauthorized"}), 401
+            if create_user.role not in role:
+                return jsonify({"message": "Forbidden: Insufficient permission"}),403
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+#Endpoint for admin site view
+@auth_blueprint.route('/admin/view', methods=['GET'])
+@jwt_required()
+def admin_view():
+    if not is_authorized(['admin', 'staff']):
+        return jsonify({'message': 'access denied'}), 403
+    return jsonify({'info': 'admin site access'}), 200
+
+#Endpoint for making modifications to the app, requires admin previlages
+@auth_blueprint.route('/admin/modify', methods=['POST'])
+@jwt_required()
+def admin_modify():
+    if not is_authorized(['admin']):
+        return jsonify({'message': 'access denied'}), 403
+    return jsonify({'message': 'Data modified successfully'}), 200
+
+#Endpoint for creating users 
+@auth_blueprint.route('/create_user', methods=['POST'])
+@role_required(["admin"])
+@jwt_required()
+def create_user():
+    data = request.json
+    if not data:
+        return jsonify({'message': 'Invalid data'})
+    
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
+    role = data.get('role', 'staff')
+
+    if role not in ['admin', 'staff']:
+        return jsonify({'message': 'Invalid role'})
+    user = User(username=username, email=email, role=role)
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({"message": f"User {username} with rolr {role} created"}), 201
+
+#Register endpoint
+@auth_blueprint.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    
+    #Create a hashed password
+    from app.init_utils import bcrypt
+    hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+    user = User(
+        username=data['username'],
+        email=data['email'],
+        password=hashed_password,
+        role=data.get('role', 'staff')
+    )
+    db.session.add(user)
+    db.session.commit()
+    return jsonify({'message': 'user created successfully'}), 201
+
+
+#Log in endpoint for admin site
+@auth_blueprint.route('/admin/login', methods=['POST'])
+def admin_login():
+
+    data = request.get_json()
+    print(data)
+
+    if not data or 'email' not in data or 'password' not in data:
+        return jsonify({'message': 'Missing email or password'}), 400
+
+    user = User.query.filter_by(email=data['email']).first()
+
+    #checks the password sent vs hashed password in the db
+    from app.init_utils import bcrypt
+    if user and bcrypt.check_password_hash(user.password, data['password']):
+        access_token = create_access_token(identity={'id': user.id, 'role': user.role})
+        return jsonify({'access_token': access_token})
+    print('Invalid credentials')
+    return jsonify({'message': 'Invalid credentials'}), 401
+
 
 #Route for mpesa callback to generate and send OTP
 @bp.route('/mpesa-callback', methods=['POST'])
@@ -16,6 +115,7 @@ def mpesa_callback():
 
     if not phone_number:
         return jsonify({'Error': 'Phone number is required'})
+    from app.utils.otp_handler import generate_otp
     otp_code = generate_otp()
     now = datetime.utcnow()
     expires_at = datetime(year=now.year, month=now.month, day=now.day) + timedelta(days=1)
@@ -24,12 +124,12 @@ def mpesa_callback():
     db.session.commit()
 
     #Send otp via sms
+    from app.utils.otp_handler import send_otp
     send_otp(phone_number, otp_code)
 
     return jsonify({'message': 'OTP sent successfully'}), 200
-
-#Verify OTP
-@bp.route('/verify-otp', methods=['POST'])
+#Log in endpoint for guests/network access
+@auth_blueprint.route('/login', methods=['POST'])
 def verify_otp_endpoint():
     data = request.json
     phone_number = data.get('phone_number')
@@ -40,14 +140,19 @@ def verify_otp_endpoint():
     if not phone_number or not otp:
         return jsonify({'Error': 'Phone number and OTP are required'}), 400
 
+    from app.utils.otp_handler import verify_otp
     if verify_otp(phone_number, otp):
+        access_token = create_access_token(
+            identity=phone_number,
+            expires_delta=timedelta(hours=1)
+        )
         publish_otp(otp, phone_number)
         return jsonify({'message': 'OTP verified successfully'}), 200
     else:
         return jsonify({'error': 'Invalid OTP'}), 401
     
 #Query notifications based on phone number
-@bp.route('/notifications', methods=['GET'])
+@bp.route('/api/notifications', methods=['GET'])
 def single_notifications_endpoint():
 
     phone_number = request.args.get('phone_number')
