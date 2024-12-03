@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { Button } from "react-bootstrap";
+import axios from 'axios';
 
 const GuestHome = () => {
 
     const [PhoneNumber, setPhoneNumber] = useState('');
     const [otp, setOtp] = useState("");
+    const [message, setMessage] = useState('');
 
     const handlePhoneNumberChange = (e) => {
         setPhoneNumber(e.target.value)
@@ -12,6 +14,29 @@ const GuestHome = () => {
 
     const handleOtpChange = (e) => {
         setOtp(e.target.value)
+    }
+
+    const handleSignIn = async () => {
+        try {
+            const response = await axios.post('http://127.0.0.1:5000/login', {
+                otp_code: otp,
+                phone_number: PhoneNumber
+                
+            });
+            
+
+            const accessToken = response.data.access_token;
+
+            setMessage('Login Successful')
+
+            alert('Login successful')
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || 'Login failed. Please try again.'
+            console.error('Error loggin in:', errorMessage)
+
+            setMessage(`Login failed: ${errorMessage}`);
+            alert(`Login failed ${errorMessage}`)
+        }
     }
 
     return (
@@ -58,7 +83,7 @@ const GuestHome = () => {
                         }}
                     />
                     <br></br>
-                    <Button>Sign In</Button>              
+                    <Button onClick={handleSignIn} >Sign In</Button>              
                 </div>
                 <div>
                     <p style={{color: 'purple', fontSize: '20px'}}><b>Customer Support: 0112735500 </b></p>

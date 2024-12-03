@@ -14,6 +14,39 @@ const LogIn = () => {
     const handlePasswordChange = (e) => {
         setPassword(e.target.value)
     }
+    //console.log(JSON.stringify({ email, password }))
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch('http://127.0.0.1:5000/admin/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: "test@example.com",
+                    password: "password123"
+                })
+            })
+            console.log('response:', response)
+
+            if (!response.ok) {
+                const error = await response.json();
+                alert(error.message || 'Login failed');
+                return;
+            }
+
+            const data = await response.json();
+            //store token in Local storage
+            localStorage.setItem('token', data.access_token);
+            alert('Login successful')
+            console.log('data:', data)
+        } catch (error) {
+            alert('Network error or server is unavailable')
+            console.error(error)
+        }
+    }
 
     return (
         <div style={{textAlign: 'center'}}>
@@ -57,7 +90,7 @@ const LogIn = () => {
                     }}
                 />
                 <br></br>
-                <Button type="submit">Log In</Button>
+                <Button type="submit" onClick={handleSubmit}>Log In</Button>
             </div>
 
 

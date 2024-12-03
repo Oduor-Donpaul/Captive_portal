@@ -11,10 +11,11 @@ import GenerateOtp from './pages/GenerateOtp';
 import AppNavbar from './components/AppNavbar';
 import GuestHome from './pages/GuestHome';
 import SignUp from './components/SignUp';
+import LogIn from './components/LogIn';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
-  const [admin, setAdmin] = useState(true);
+  const [admin, setAdmin] = useState(false);
 
 
   //Establish socketio connection to the server
@@ -38,10 +39,12 @@ function App() {
             <Route path='/admin/search' element={<OtpSearch />} />
             <Route path='/admin/generateotp' element={<GenerateOtp />} />
             <Route path='/admin/signup' element={<SignUp />} />
+            <Route path='/admin/login' element={<LogIn />} />
           </Routes>
           :
           <Routes>
             <Route path='/' element={<GuestHome />} />
+            <Route path='/login' element={<LogIn />} />
         </Routes>
         }
       </div>

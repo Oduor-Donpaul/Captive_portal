@@ -5,6 +5,8 @@ from app.config import Config
 from dotenv import load_dotenv
 from app.init_utils import bcrypt, login_manager
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
+
 
 
 #initialize database
@@ -19,8 +21,8 @@ def create_app():
 
 	#load confugaration settings
 	app.config.from_object(Config)
-
-
+	#Enable CORS
+	CORS(app, origins=['http://localhost:3000','http://localhost:3000'])
 	#Initialize extensions
 	bcrypt.init_app(app)
 	login_manager.init_app(app)
@@ -29,8 +31,9 @@ def create_app():
 	migrate.init_app(app, db) #initialize migrate instance with app and db
 
 	#register blueprints
-	from .routes import bp
+	from .routes import bp, auth_blueprint
 	app.register_blueprint(bp)
+	app.register_blueprint(auth_blueprint)
 	
 	#app.register_blueprint(main)
 
