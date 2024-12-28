@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useState } from "react";
 import { Button } from "react-bootstrap";
 
@@ -5,10 +6,30 @@ const GenerateOtp = () => {
 
     const [PhoneNumber, setPhoneNumber] = useState('');
     const [otp, setOtp] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const handleInputChange = (e) => {
         setPhoneNumber(e.target.value)
     };
+
+    const getOtp = async () => {
+        try {
+            const response = await axios.post('http://127.0.0.1:5000/mpesa-callback', 
+                {
+                    PhoneNumber: PhoneNumber
+                }
+            );
+
+            setLoading(true)
+
+            const message = response.data.message
+            alert(message)
+        } catch (error) {
+            console.error('Error getting otp:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     return (
         <div style={{textAlign: "center", marginTop: '10px'}}>
@@ -31,11 +52,9 @@ const GenerateOtp = () => {
                 
             </div>
             <div style={{margin: '20px'}}>
-                <Button type="submit"><b>Generate</b></Button>
+                <Button onClick={getOtp}><b>{loading ? 'Generating...' : 'Generate'}</b></Button>
             </div>
-            <div>
-                <p>Dear {PhoneNumber} enter {otp} as your OTP. Please Do not share it with anyone.<br></br> Techpoint</p>
-            </div>
+
         </div>
     )
 };

@@ -28,4 +28,11 @@ def verify_otp(phone_number, otp):
         return True
     return False
 
+#Check if otp is verified
+def otp_verification_status(phone_number, otp):
+    otp_instance = OTP.query.filter_by(phone_number=phone_number, otp_code=otp).first()
+
+    if otp_instance and otp_instance.is_verified and not otp_instance.is_expired():
+        return True
+    return False
 

@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { Button } from "react-bootstrap";
 import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
 
 
-const SignUp = () => {
+const SignIn = () => {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState('');
-    const [message, setMessage] = useState('')
+    const [message, setMessage] = useState('');
+    const location = useLocation()
+    const navigate = useNavigate();
 
     const handleEmailChange = (e) => {
         setEmail(e.target.value)
@@ -18,24 +20,22 @@ const SignUp = () => {
         setPassword(e.target.value)
     }
 
-    const handleRoleChange = (e) => {
-        setRole(e.target.value)
-    }
-
     const handleSignIn = async () => {
         try {
             const response = await axios.post('http://127.0.0.1:5000/admin/login', {
                 email: email,
                 password: password                
-            },
-            { headers: { 'Content-Type': 'application/json' } }
-        );
+            });
 
             const access_token = response.data.access_token
 
-            setMessage('Login successful')
+            localStorage.setItem('authToken', access_token)
 
+            setMessage('Login successful')
             alert(message)
+
+            const redirectTo = location.state?.from?.pathname || '/admin/'
+            navigate(redirectTo, {replace: true})
         } catch (error) {
             const errorMessage = error.response?.data?.message || 'Login failed. Please try again'
             console.error('erroe loging in:', errorMessage)
@@ -88,22 +88,10 @@ const SignUp = () => {
                     }}
                 />
                 <br></br>
-                <label htmlFor="role">
-                    Role
-                </label>
-                <br></br>
-                <input
-                    name="role"
-                    type="text"
-                    value={role}
-                    onChange={handleRoleChange}
-                    placeholder="role"
-                />
-                <br></br>
-                <Button onClick={handleSignIn}>Sign Up</Button>
+                <Button onClick={handleSignIn}>Sign In</Button>
             </div>
         </div>
     )
 };
 
-export default SignUp;
+export default SignIn;

@@ -1,8 +1,8 @@
-"""Create user table
+"""Recreate migrations
 
-Revision ID: 757221539793
-Revises: 6d6206370545
-Create Date: 2024-11-29 13:23:15.062462
+Revision ID: b9ec2f343dd1
+Revises: 
+Create Date: 2024-12-28 21:52:51.289997
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '757221539793'
-down_revision = '6d6206370545'
+revision = 'b9ec2f343dd1'
+down_revision = None
 branch_labels = None
 depends_on = None
 
@@ -38,6 +38,7 @@ def upgrade():
     sa.Column('phone_number', sa.String(length=15), nullable=False),
     sa.Column('expires_at', sa.DateTime(), nullable=False),
     sa.Column('is_verified', sa.Boolean(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('user',

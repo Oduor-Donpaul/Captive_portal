@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response
 from .models import OTP, Message
 from app import db
 from datetime import datetime, timedelta
@@ -6,10 +6,19 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 from flask import Blueprint
 from .models import User
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+import os
+import traceback
+from flask_cors import cross_origin
 
-
+load_dotenv()
 bp = Blueprint("main", __name__)
 auth_blueprint = Blueprint('auth', __name__)
+
+RADIUS_SERVER=os.getenv("RADIUS_SERVER")
+RADIUS_SECRET=b"the-first"
+RADIUS_PORT=os.getenv("RADIUS_PORT")
+
 
 #checks authorization
 def is_authorized(roles):
@@ -88,6 +97,7 @@ def register():
 
 #Log in endpoint for admin site
 @auth_blueprint.route('/admin/login', methods=['POST'])
+@cross_origin(origin='http://localhost:3000')
 def admin_login():
 
     data = request.get_json()
@@ -105,6 +115,22 @@ def admin_login():
         return jsonify({'access_token': access_token})
     print('Invalid credentials')
     return jsonify({'message': 'Invalid credentials'}), 401
+
+#Route for retrieving OTP
+@bp.route('/admin/get-otp', methods=['POST'])
+def get_otp():
+    data = request.json
+    phone_number = data.get('PhoneNumber')
+
+    if not phone_number:
+        return jsonify({'message': 'phone number is required'}), 400
+    
+    otp = OTP.query.filter_by(phone_number=phone_number).order_by(OTP.created_at.desc()).first()
+    
+    if not otp:
+        return jsonify({'message': 'No OTP found for this phone number'}), 404
+    
+    return jsonify({"otp": otp.otp_code, "created_at": otp.created_at}), 200
 
 
 #Route for mpesa callback to generate and send OTP
@@ -146,10 +172,34 @@ def verify_otp_endpoint():
             identity=phone_number,
             expires_delta=timedelta(hours=1)
         )
+
         publish_otp(otp, phone_number)
-        return jsonify({'message': 'OTP verified successfully'}), 200
-    else:
-        return jsonify({'error': 'Invalid OTP'}), 401
+        return jsonify({
+        'message': 'OTP verified successfully',
+        'access_token': access_token
+       }), 200
+    return jsonify({'error': 'Invalid OTP'}), 401
+
+#athenticate free radius request  
+@bp.route('/api/auth/authenticate', methods=['POST']) 
+def freeradius_authenticate():
+    data = request.get_json()
+
+    print(f"Data: {data}")
+
+    phone_number = data['phone_number']
+    otp = data['otp_code']
+
+    from app.utils.otp_handler import otp_verification_status
+
+    if otp_verification_status(phone_number, otp):
+        authenticated = "ok"
+        return jsonify({'authenticated': authenticated})
+    return Response(
+        "Authentication Not Allowed",
+        status=400,
+    )
+
     
 #Query notifications based on phone number
 @bp.route('/api/notifications', methods=['GET'])

@@ -14,7 +14,7 @@ const AdminNavbar = () => {
               <Nav.Link href='/admin/notifications/all'>Notifications</Nav.Link>
               <Nav.Link href='/admin/search'>Search</Nav.Link>
               <Nav.Link href='/admin/generateotp'>Generate OTP</Nav.Link>
-              <Nav.Link href='/admin/signup'>Sign Up</Nav.Link>
+              <Nav.Link href='/admin/signin'>Sign In</Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>

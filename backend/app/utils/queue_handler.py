@@ -6,6 +6,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 from kombu import Connection, Exchange, Queue
 from app.models import  Message
+from socket import timeout as SocketTimeOut
 
 app = create_app()
 CORS(app, resources={r"/*": {"origins": ["http://localhost:3000"]}})
@@ -69,5 +70,5 @@ def start_consumer():
                 try:
                     while True:
                         conn.drain_events(timeout=1)
-                except TimeoutError:
+                except SocketTimeOut:
                     print("No messages recieved, waiting for messages..")

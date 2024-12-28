@@ -12,10 +12,12 @@ import AppNavbar from './components/AppNavbar';
 import GuestHome from './pages/GuestHome';
 import SignUp from './components/SignUp';
 import LogIn from './components/LogIn';
+import SignIn from './components/SignIn';
+import ProtectedRoute from './components/ProtectedRoute';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
-  const [admin, setAdmin] = useState(false);
+  const [admin, setAdmin] = useState(true);
 
 
   //Establish socketio connection to the server
@@ -35,10 +37,25 @@ function App() {
         {admin ?
           <Routes>
             <Route path='/admin' element={<Home />} />
-            <Route path='/admin/notifications/all' element={<Notifications />} />
-            <Route path='/admin/search' element={<OtpSearch />} />
-            <Route path='/admin/generateotp' element={<GenerateOtp />} />
-            <Route path='/admin/signup' element={<SignUp />} />
+            
+              <Route path='/admin/notifications/all' element={
+                <ProtectedRoute>
+                  <Notifications />
+                </ProtectedRoute>  
+                  } />
+              <Route path='/admin/search' element={
+                <ProtectedRoute>
+                  <OtpSearch />
+                  </ProtectedRoute>  
+                  } />
+              <Route path='/admin/generateotp' element={
+                <ProtectedRoute>
+                  <GenerateOtp />
+                </ProtectedRoute>
+                } />
+              <Route path='/admin/signin' element={<SignIn />} />
+            
+
             <Route path='/admin/login' element={<LogIn />} />
           </Routes>
           :

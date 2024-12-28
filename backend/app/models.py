@@ -25,6 +25,7 @@ class OTP(db.Model):
 	phone_number = db.Column(db.String(15), nullable=False)
 	expires_at = db.Column(db.DateTime, nullable=False)
 	is_verified = db.Column(db.Boolean, default=False)
+	created_at = db.Column(db.DateTime, default=datetime.utcnow)
 	
 	def __repr__(self):
 		return f"<OTP {self.otp_code}>"
